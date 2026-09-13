@@ -73,13 +73,12 @@ export default function FortuneForm({ initialValues, onSubmit }: FortuneFormProp
   const [form, setForm] = useState<FormState>(initialValues ?? EMPTY_FORM);
   const [errors, setErrors] = useState<FortuneFormErrors>({});
 
-  // Loading previously saved birth info from localStorage happens after mount
-  // (see app/page.tsx), so sync it into the form once it arrives.
+  // `initialValues` changes when localStorage finishes hydrating in the
+  // parent, and again to null when the parent resets ("다시 확인하기") - both
+  // cases should be reflected in the visible form, not just internal state.
   useEffect(() => {
-    if (initialValues) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncs the form once with data hydrated asynchronously from localStorage in the parent
-      setForm(initialValues);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncs the form with birth info hydrated from localStorage or reset by the parent
+    setForm(initialValues ?? EMPTY_FORM);
   }, [initialValues]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {

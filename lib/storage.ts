@@ -28,3 +28,13 @@ export function saveBirthInfo(info: BirthInfo): void {
     // Storage unavailable (private mode, quota exceeded, etc.) - ignore silently.
   }
 }
+
+export function clearBirthInfo(): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Storage unavailable - ignore silently.
+  }
+}

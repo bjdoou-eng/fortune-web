@@ -4,12 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import FortuneForm from "@/components/FortuneForm";
 import FortuneResult from "@/components/FortuneResult";
 import { generateFortune } from "@/lib/fortune";
-import { loadBirthInfo, saveBirthInfo } from "@/lib/storage";
+import { clearBirthInfo, loadBirthInfo, saveBirthInfo } from "@/lib/storage";
 import type { BirthInfo } from "@/types/fortune";
 
 export default function Home() {
   const [birthInfo, setBirthInfo] = useState<BirthInfo | null>(null);
-  const [refreshSeed, setRefreshSeed] = useState(0);
   const [shouldScrollToResult, setShouldScrollToResult] = useState(false);
 
   const formSectionRef = useRef<HTMLDivElement>(null);
@@ -32,23 +31,26 @@ export default function Home() {
 
   const fortune = useMemo(() => {
     if (!birthInfo) return null;
-    return generateFortune(birthInfo, refreshSeed);
-  }, [birthInfo, refreshSeed]);
+    return generateFortune(birthInfo);
+  }, [birthInfo]);
 
   function handleFormSubmit(info: BirthInfo) {
     setBirthInfo(info);
-    setRefreshSeed(0);
     saveBirthInfo(info);
-    setShouldScrollToResult(true);
-  }
-
-  function handleRetry() {
-    setRefreshSeed((seed) => seed + 1);
     setShouldScrollToResult(true);
   }
 
   function handleEdit() {
     formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // Resets everything back to a blank form rather than reshuffling the
+  // result - the same name + birth date on the same day must always produce
+  // the same fortune, so "다시 확인하기" starts over instead of re-rolling.
+  function handleRetry() {
+    setBirthInfo(null);
+    clearBirthInfo();
+    handleEdit();
   }
 
   return (
@@ -80,11 +82,7 @@ export default function Home() {
         </div>
 
         {fortune && birthInfo && (
-          <div
-            key={refreshSeed + (birthInfo.name || "")}
-            ref={resultSectionRef}
-            className="scroll-mt-10 animate-fortune-reveal"
-          >
+          <div ref={resultSectionRef} className="scroll-mt-10 animate-fortune-reveal">
             <FortuneResult
               birthInfo={birthInfo}
               fortune={fortune}

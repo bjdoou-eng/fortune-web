@@ -204,18 +204,11 @@ function todayKey(): string {
 
 /**
  * Generates a deterministic mock fortune for the given birth info.
- * The same inputs on the same day always return the same result; passing a
- * different `variant` (e.g. when the user taps "다시 확인하기") reshuffles it.
+ * The same name + birth date (+ time/gender) on the same day always return
+ * the exact same result - there is no randomization knob here on purpose.
  */
-export function generateFortune(info: BirthInfo, variant = 0): FortuneResult {
-  const seedInput = [
-    info.name,
-    info.birthDate,
-    info.birthTime,
-    info.gender,
-    todayKey(),
-    variant,
-  ].join("|");
+export function generateFortune(info: BirthInfo): FortuneResult {
+  const seedInput = [info.name, info.birthDate, info.birthTime, info.gender, todayKey()].join("|");
   const random = createRandom(hashString(seedInput));
 
   return {
