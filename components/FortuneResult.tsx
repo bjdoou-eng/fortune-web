@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { findSijinByValue, formatSijinRange } from "@/lib/sijin";
 import type { BirthInfo, FortuneResult as FortuneResultData } from "@/types/fortune";
 
 interface FortuneResultProps {
@@ -24,12 +25,9 @@ function formatBirthDate(dateStr: string): string {
 
 function formatBirthTime(timeStr: string, isUnknown: boolean): string {
   if (isUnknown || !timeStr) return "시간 모름";
-  const [hourStr, minuteStr] = timeStr.split(":");
-  const hour = Number(hourStr);
-  const minute = Number(minuteStr);
-  const period = hour < 12 ? "오전" : "오후";
-  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-  return `${period} ${hour12}시 ${String(minute).padStart(2, "0")}분`;
+  const sijin = findSijinByValue(timeStr);
+  if (!sijin) return timeStr;
+  return `${sijin.label} (${formatSijinRange(sijin)})`;
 }
 
 export default function FortuneResult({ birthInfo, fortune, onEdit, onRetry }: FortuneResultProps) {

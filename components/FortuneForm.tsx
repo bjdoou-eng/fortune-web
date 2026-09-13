@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { formatSijinRange, SIJIN_OPTIONS } from "@/lib/sijin";
 import type { BirthInfo, FortuneFormErrors, Gender } from "@/types/fortune";
 
 interface FortuneFormProps {
@@ -143,9 +144,9 @@ export default function FortuneForm({ initialValues, onSubmit }: FortuneFormProp
 
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <label htmlFor="fortune-birth-time" className={LABEL_CLASS}>
+          <span id="fortune-birth-time-label" className={LABEL_CLASS}>
             태어난 시간
-          </label>
+          </span>
           <label
             htmlFor="fortune-birth-time-unknown"
             className="flex cursor-pointer items-center gap-1.5 text-xs text-ink-soft"
@@ -168,16 +169,43 @@ export default function FortuneForm({ initialValues, onSubmit }: FortuneFormProp
             </span>
           </label>
         </div>
-        <input
-          id="fortune-birth-time"
-          type="time"
-          value={form.birthTime}
-          disabled={form.isBirthTimeUnknown}
-          onChange={(e) => setForm((f) => ({ ...f, birthTime: e.target.value }))}
-          aria-invalid={Boolean(errors.birthTime)}
+        <div
+          role="radiogroup"
+          aria-labelledby="fortune-birth-time-label"
           aria-describedby={errors.birthTime ? "fortune-birth-time-error" : undefined}
-          className={INPUT_CLASS}
-        />
+          className="grid grid-cols-4 gap-1.5"
+        >
+          {SIJIN_OPTIONS.map((option) => {
+            const id = `fortune-birth-time-${option.key}`;
+            const checked = form.birthTime === option.value;
+            return (
+              <label
+                key={option.key}
+                htmlFor={id}
+                className={`flex flex-col items-center justify-center gap-0.5 rounded-lg border px-1 py-2 text-center transition ${
+                  form.isBirthTimeUnknown ? "cursor-not-allowed opacity-40" : "cursor-pointer"
+                } ${
+                  checked
+                    ? "border-accent bg-accent-soft text-accent"
+                    : "border-line bg-paper-raised text-ink-soft hover:text-ink"
+                }`}
+              >
+                <input
+                  id={id}
+                  type="radio"
+                  name="birthTimeSlot"
+                  value={option.value}
+                  checked={checked}
+                  disabled={form.isBirthTimeUnknown}
+                  onChange={() => setForm((f) => ({ ...f, birthTime: option.value }))}
+                  className="sr-only"
+                />
+                <span className="text-sm font-medium">{option.label}</span>
+                <span className="text-[10px] text-ink-soft/70">{formatSijinRange(option, "short")}</span>
+              </label>
+            );
+          })}
+        </div>
         {errors.birthTime && (
           <p id="fortune-birth-time-error" role="alert" className={ERROR_CLASS}>
             {errors.birthTime}
