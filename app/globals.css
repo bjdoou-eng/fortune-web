@@ -52,6 +52,10 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  /* Keep Korean words intact when wrapping (avoid breaking mid-어절); still
+     allow an unbreakable long token to wrap as a fallback. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 @keyframes fortune-reveal {
